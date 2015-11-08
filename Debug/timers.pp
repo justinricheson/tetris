@@ -16,6 +16,7 @@ timers.obj: C:/ti/ccsv5/tools/compiler/tms470_4.9.5/include/linkage.h
 timers.obj: ../audio.h
 timers.obj: ../globals.h
 timers.obj: ../sounds.h
+timers.obj: ../graphics.h
 
 ../timers.c: 
 C:/StellarisWare/inc/hw_ints.h: 
@@ -33,3 +34,4 @@ C:/ti/ccsv5/tools/compiler/tms470_4.9.5/include/linkage.h:
 ../audio.h: 
 ../globals.h: 
 ../sounds.h: 
+../graphics.h: 

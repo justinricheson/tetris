@@ -12,6 +12,7 @@ $(GEN_CMDS__FLAG) \
 "./timers.obj" \
 "./startup_ccs.obj" \
 "./sounds.obj" \
+"./graphics.obj" \
 "./audio.obj" \
 -l"libc.a" \
 -l"C:/StellarisWare/boards/ek-lm3s8962/timers/ccs/../../../../driverlib/ccs-cm3/Debug/driverlib-cm3.lib" \
@@ -130,8 +131,9 @@ timers.out: $(OBJS) $(CMD_SRCS) $(GEN_CMDS)
 # Other Targets
 clean:
 	-$(RM) $(TMS470_EXECUTABLE_OUTPUTS__QUOTED) "timers.out"
+	-$(RM) "graphics.pp" 
 	-$(RM) "audio.pp" "sounds.pp" "startup_ccs.pp" "timers.pp" "drivers\rit128x96x4.pp" 
-	-$(RM) "audio.obj" "sounds.obj" "startup_ccs.obj" "timers.obj" "drivers\rit128x96x4.obj" 
+	-$(RM) "audio.obj" "graphics.obj" "sounds.obj" "startup_ccs.obj" "timers.obj" "drivers\rit128x96x4.obj" 
 	-@echo 'Finished clean'
 	-@echo ' '
 

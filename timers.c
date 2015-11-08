@@ -11,6 +11,7 @@
 #include "audio.h"
 #include "globals.h"
 #include "sounds.h"
+#include "graphics.h"
 
 // Called on driver library error
 #ifdef DEBUG
@@ -29,53 +30,53 @@ int first = 1;
 // Game State
 
 // Button States
-int b0_S = 0; // D
-int b1_S = 0; // U
-int b2_S = 0; // L
-int b3_S = 0; // R
-int b4_S = 0; // RR
+int b0 = 0; // D
+int b1 = 0; // U
+int b2 = 0; // L
+int b3 = 0; // R
+int b4 = 0; // RR
 
 inline int ButtonUp(int curValue, int preValue)
 {
-	if(!curValue && preValue)
-	{
-		return 1;
-	}
+    if(!curValue && preValue)
+    {
+        return 1;
+    }
 
-	return 0;
+    return 0;
 }
 
 inline int ButtonDown(int curValue, int preValue)
 {
-	if(curValue && !preValue)
-	{
-		return 1;
-	}
+    if(curValue && !preValue)
+    {
+        return 1;
+    }
 
-	return 0;
+    return 0;
 }
 
 inline int ButtonChanged(int curValue, int preValue)
 {
-	return curValue != preValue;
+    return curValue != preValue;
 }
 
-int ValidButtonCombo(int b0, int b1, int b2, int b3, int b4)
+inline int ValidButtonCombo(int b0, int b1, int b2, int b3, int b4)
 {
-	if(b0)
-	{
-		return 0;
-	}
+    if(b0)
+    {
+        return 0;
+    }
 
-	int numPressed = b1 + b2 + b3 + b4;
+    int numPressed = b1 + b2 + b3 + b4;
 
-	if(b4)
-	{
-		return numPressed <= 2; // Select can be pressed alone of with any direction button
-	}
+    if(b4)
+    {
+        return numPressed <= 2; // Select can be pressed alone of with any direction button
+    }
 
-	// Otherwise, at most one button can be pressed at a time
-	return numPressed <= 1;
+    // Otherwise, at most one button can be pressed at a time
+    return numPressed <= 1;
 }
 
 void Timer0IntHandler(void)
@@ -85,83 +86,83 @@ void Timer0IntHandler(void)
     AudioHandler(); // Play sounds
 
     // Get button states
-	unsigned long buttons;
-	buttons = (GPIOPinRead(GPIO_PORTE_BASE, (GPIO_PIN_0 | GPIO_PIN_1 | GPIO_PIN_2 | GPIO_PIN_3)) |
+    unsigned long buttons;
+    buttons = (GPIOPinRead(GPIO_PORTE_BASE, (GPIO_PIN_0 | GPIO_PIN_1 | GPIO_PIN_2 | GPIO_PIN_3)) |
               (GPIOPinRead(GPIO_PORTF_BASE,  GPIO_PIN_1) << 3));
 
-	int b0 = !(buttons & 1);
-	int b1 = !((buttons & 2) >> 1);
-	int b2 = !((buttons & 4) >> 2);
-	int b3 = !((buttons & 8) >> 3);
-	int b4 = !((buttons & 16) >> 4);
-	if(ValidButtonCombo(b0, b1, b2, b3, b4))
-	{
+    int b0_t = !(buttons & 1);
+    int b1_t = !((buttons & 2) >> 1);
+    int b2_t = !((buttons & 4) >> 2);
+    int b3_t = !((buttons & 8) >> 3);
+    int b4_t = !((buttons & 16) >> 4);
+    if(ValidButtonCombo(b0_t, b1_t, b2_t, b3_t, b4_t))
+    {
 
-	}
+    }
 
-	if(ButtonChanged(b0, b0_S)
-    || ButtonChanged(b1, b1_S)
-    || ButtonChanged(b2, b2_S)
-    || ButtonChanged(b3, b3_S)
-    || ButtonChanged(b4, b4_S))
-	{
-		tick = 1;
-	}
+    if(ButtonChanged(b0_t, b0)
+    || ButtonChanged(b1_t, b1)
+    || ButtonChanged(b2_t, b2)
+    || ButtonChanged(b3_t, b3)
+    || ButtonChanged(b4_t, b4))
+    {
+        tick = 1;
+    }
 
-	// Store button states
-	b0_S = b0;
-	b1_S = b1;
-	b2_S = b2;
-	b3_S = b3;
-	b4_S = b4;
+    // Store button states
+    b0 = b0_t;
+    b1 = b1_t;
+    b2 = b2_t;
+    b3 = b3_t;
+    b4 = b4_t;
 
-	// Trigger the event the first time so the initial screen is drawn
-	if(first)
-	{
-		first = 0;
-		tick = 1; // Signal event
-	}
+    // Trigger the event the first time so the initial screen is drawn
+    if(first)
+    {
+        first = 0;
+        tick = 1; // Signal event
+    }
 }
 
 char * intToString(int input)
 {
-	// Convert int to char pointer
-	// Only works with non-negative values 0 - 99
-	int flag = 0;
-	int i = 1;
-	char str[3] = { '0', '0', '\0' };
-	while(input != 0)
-	{
-		str[i--] = (input % 10) + '0';
-		input /= 10;
-		flag = 1;
-	}
+    // Convert int to char pointer
+    // Only works with non-negative values 0 - 99
+    int flag = 0;
+    int i = 1;
+    char str[3] = { '0', '0', '\0' };
+    while(input != 0)
+    {
+        str[i--] = (input % 10) + '0';
+        input /= 10;
+        flag = 1;
+    }
 
-	if(!flag) // Input == 0
-	{
-		return "00";
-	}
+    if(!flag) // Input == 0
+    {
+        return "00";
+    }
 
-	char *result = malloc(3);
-	if(result == NULL)
-	{
-		return NULL;
-	}
+    char *result = malloc(3);
+    if(result == NULL)
+    {
+        return NULL;
+    }
 
-	{ // Additional scope so we don't need to define j up top, CC Studio is C89
-		int j;
-		for(j = 0; j < 3; j++)
-		{
-			result[j] = str[j];
-		}
-	}
+    { // Additional scope so we don't need to define j up top, CC Studio is C89
+        int j;
+        for(j = 0; j < 3; j++)
+        {
+            result[j] = str[j];
+        }
+    }
 
-	return result;
+    return result;
 }
 
 int main(void)
 {
-	// Init clocks
+    // Init clocks
     SysCtlClockSet(SYSCTL_SYSDIV_1 | SYSCTL_USE_OSC | SYSCTL_OSC_MAIN | SYSCTL_XTAL_8MHZ);
     SysCtlPWMClockSet(SYSCTL_PWMDIV_8);
 
@@ -195,24 +196,35 @@ int main(void)
     GPIOPinTypePWM(GPIO_PORTG_BASE, GPIO_PIN_1);
     AudioOn();
 
-	//char *pTimeHours = intToString(hours);
-	//RIT128x96x4StringDraw(pTimeHours, 0, 0, 15);
+    //char *pTimeHours = intToString(hours);
+    //RIT128x96x4StringDraw(pTimeHours, 0, 0, 15);
     //AudioPlaySound(g_pusFireEffect, sizeof(g_pusFireEffect) / 2);
+
+    unsigned char *pucRow = (unsigned char *)&logo[BITMAP_HEADER_SIZE];
+    unsigned long logoHeight = (unsigned long)logo[BITMAP_HEIGHT_OFFSET];
+    unsigned long logoWidth = (unsigned long)logo[BITMAP_WIDTH_OFFSET];
+    unsigned long row;
+    for(row = 0; row < logoHeight; row++)
+    {
+        RIT128x96x4ImageDraw(pucRow, ((128 - logoWidth) / 2),
+                             (80 - row), logoWidth, 1);
+        pucRow += (logoWidth / 2);
+    }
 
     IntMasterEnable();
     while(1)
     {
-    	while(!tick); // Wait for events
+        while(!tick); // Wait for events
 
-    	IntMasterDisable();
-    	tick = 0; // Reset event flag
+        IntMasterDisable();
+        tick = 0; // Reset event flag
 
-    	RIT128x96x4StringDraw(b0 ? "ON " : "OFF", 00, 0, 15);
-    	RIT128x96x4StringDraw(b1 ? "ON " : "OFF", 10, 0, 15);
-    	RIT128x96x4StringDraw(b2 ? "ON " : "OFF", 20, 0, 15);
-    	RIT128x96x4StringDraw(b3 ? "ON " : "OFF", 30, 0, 15);
-    	RIT128x96x4StringDraw(b4 ? "ON " : "OFF", 40, 0, 15);
+        RIT128x96x4StringDraw(b0 ? "ON " : "OFF", 00, 0, 15);
+        RIT128x96x4StringDraw(b1 ? "ON " : "OFF", 20, 0, 15);
+        RIT128x96x4StringDraw(b2 ? "ON " : "OFF", 40, 0, 15);
+        RIT128x96x4StringDraw(b3 ? "ON " : "OFF", 60, 0, 15);
+        RIT128x96x4StringDraw(b4 ? "ON " : "OFF", 80, 0, 15);
 
-		IntMasterEnable();
+        IntMasterEnable();
     }
 }
