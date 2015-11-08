@@ -1,0 +1,415 @@
+******************************************************************************
+                  TMS470 Linker PC v4.9.5                      
+******************************************************************************
+>> Linked Sun Oct 25 18:27:49 2015
+
+OUTPUT FILE NAME:   <timers.out>
+ENTRY POINT SYMBOL: "_c_int00"  address: 00001911
+
+
+MEMORY CONFIGURATION
+
+         name            origin    length      used     unused   attr    fill
+----------------------  --------  ---------  --------  --------  ----  --------
+  FLASH                 00000000   00040000  0000205b  0003dfa5  R  X
+  SRAM                  20000000   00010000  0000048c  0000fb74  RW X
+
+
+SEGMENT ALLOCATION MAP
+
+run origin  load origin   length   init length attrs members
+----------  ----------- ---------- ----------- ----- -------
+00000000    00000000    00002060   00002060    r-x
+  00000000    00000000    000000f0   000000f0    r-- .intvecs
+  000000f0    000000f0    00001acc   00001acc    r-x .text
+  00001bbc    00001bbc    0000044f   0000044f    r-- .const
+  00002010    00002010    00000050   00000050    r-- .cinit
+20000000    20000000    00000400   00000000    rw-
+  20000000    20000000    00000200   00000000    rw- .stack
+  20000200    20000200    00000200   00000000    rw- .sysmem
+20000400    20000400    0000008c   00000074    rw-
+  20000400    20000400    00000074   00000074    rw- .data
+  20000474    20000474    00000018   00000000    rw- .bss
+
+
+SECTION ALLOCATION MAP
+
+ output                                  attributes/
+section   page    origin      length       input sections
+--------  ----  ----------  ----------   ----------------
+.intvecs   0    00000000    000000f0     
+                  00000000    000000f0     startup_ccs.obj (.intvecs)
+
+.init_array 
+*          0    00000000    00000000     UNINITIALIZED
+
+.text      0    000000f0    00001acc     
+                  000000f0    000003e0     rtsv7M3_T_le_eabi.lib : memory.obj (.text)
+                  000004d0    00000388     timers.obj (.text:Timer0IntHandler)
+                  00000858    00000348     timers.obj (.text:main)
+                  00000ba0    00000198     driverlib-cm3.lib : sysctl.obj (.text:SysCtlClockGet)
+                  00000d38    00000144     rit128x96x4.obj (.text:RIT128x96x4StringDraw)
+                  00000e7c    00000144     driverlib-cm3.lib : sysctl.obj (.text:SysCtlClockSet)
+                  00000fc0    000000f0     audio.obj (.text:AudioHandler)
+                  000010b0    000000c8     driverlib-cm3.lib : gpio.obj (.text:GPIOPadConfigSet)
+                  00001178    000000c0     rit128x96x4.obj (.text:RIT128x96x4Init)
+                  00001238    0000009c     rtsv7M3_T_le_eabi.lib : memcpy_t2.obj (.text)
+                  000012d4    00000094     rit128x96x4.obj (.text:RITWriteCommand)
+                  00001368    00000094     rit128x96x4.obj (.text:RITWriteData)
+                  000013fc    00000094     timers.obj (.text:intToString)
+                  00001490    00000094     rtsv7M3_T_le_eabi.lib : auto_init.obj (.text)
+                  00001524    00000070     rit128x96x4.obj (.text:RIT128x96x4Clear)
+                  00001594    00000064     driverlib-cm3.lib : interrupt.obj (.text:IntEnable)
+                  000015f8    00000064     rit128x96x4.obj (.text:RIT128x96x4Enable)
+                  0000165c    0000005e     rtsv7M3_T_le_eabi.lib : copy_decompress_rle.obj (.text)
+                  000016ba    00000002     startup_ccs.obj (.text:FaultISR)
+                  000016bc    00000058     audio.obj (.text:AudioVolume)
+                  00001714    00000058     driverlib-cm3.lib : sysctl.obj (.text:SysCtlPeripheralEnable)
+                  0000176c    00000050     timers.obj (.text:ValidButtonCombo)
+                  000017bc    00000048     rtsv7M3_T_le_eabi.lib : cpy_tbl.obj (.text)
+                  00001804    00000044     audio.obj (.text:AudioPlaySound)
+                  00001848    00000044     driverlib-cm3.lib : ssi.obj (.text:SSIConfigSetExpClk)
+                  0000188c    00000044     rtsv7M3_T_le_eabi.lib : exit.obj (.text)
+                  000018d0    00000040     audio.obj (.text:AudioMute)
+                  00001910    00000034     rtsv7M3_T_le_eabi.lib : boot.obj (.text)
+                  00001944    00000030     audio.obj (.text:AudioOn)
+                  00001974    0000002e     driverlib-cm3.lib : gpio.obj (.text:GPIODirModeSet)
+                  000019a2    00000028                       : pwm.obj (.text:PWMGenConfigure)
+                  000019ca    00000002     startup_ccs.obj (.text:IntDefaultHandler)
+                  000019cc    00000024     driverlib-cm3.lib : timer.obj (.text:TimerConfigure)
+                  000019f0    0000001a     timers.obj (.text:ButtonUp)
+                  00001a0a    00000002     startup_ccs.obj (.text:NmiSR)
+                  00001a0c    00000018     rtsv7M3_T_le_eabi.lib : _lock.obj (.text)
+                  00001a24    00000018                           : args_main.obj (.text)
+                  00001a3c    00000016     driverlib-cm3.lib : pwm.obj (.text:PWMOutputInvert)
+                  00001a52    00000016                       : pwm.obj (.text:PWMOutputState)
+                  00001a68    00000014                       : pwm.obj (.text:PWMGenPeriodSet)
+                  00001a7c    00000014                       : sysctl.obj (.text:SysCtlPWMClockSet)
+                  00001a90    00000012                       : gpio.obj (.text:GPIOPinTypeGPIOInput)
+                  00001aa2    00000012                       : gpio.obj (.text:GPIOPinTypeGPIOOutput)
+                  00001ab4    00000012                       : gpio.obj (.text:GPIOPinTypePWM)
+                  00001ac6    00000012                       : gpio.obj (.text:GPIOPinTypeSSI)
+                  00001ad8    00000012                       : timer.obj (.text:TimerLoadSet)
+                  00001aea    00000012     rtsv7M3_T_le_eabi.lib : copy_zero_init.obj (.text:decompress:ZI)
+                  00001afc    00000010     rit128x96x4.obj (.text:RIT128x96x4DisplayOff)
+                  00001b0c    0000000e     driverlib-cm3.lib : timer.obj (.text:TimerEnable)
+                  00001b1a    0000000e     rtsv7M3_T_le_eabi.lib : copy_decompress_none.obj (.text:decompress:none)
+                  00001b28    0000000c     driverlib-cm3.lib : cpu.obj (.text:CPUcpsid)
+                  00001b34    0000000c                       : cpu.obj (.text:CPUcpsie)
+                  00001b40    0000000a                       : interrupt.obj (.text:IntMasterDisable)
+                  00001b4a    0000000a                       : interrupt.obj (.text:IntMasterEnable)
+                  00001b54    0000000a                       : pwm.obj (.text:PWMGenDisable)
+                  00001b5e    0000000a                       : pwm.obj (.text:PWMGenEnable)
+                  00001b68    0000000a                       : ssi.obj (.text:SSIDataPut)
+                  00001b72    0000000a                       : ssi.obj (.text:SSIDisable)
+                  00001b7c    0000000a                       : ssi.obj (.text:SSIEnable)
+                  00001b86    00000008                       : ssi.obj (.text:SSIBusy)
+                  00001b8e    00000008                       : timer.obj (.text:TimerIntEnable)
+                  00001b96    00000006                       : gpio.obj (.text:GPIOPinRead)
+                  00001b9c    00000006                       : gpio.obj (.text:GPIOPinWrite)
+                  00001ba2    00000006     startup_ccs.obj (.text:ResetISR)
+                  00001ba8    00000006     driverlib-cm3.lib : sysctl.obj (.text:SysCtlDelay)
+                  00001bae    00000006     rtsv7M3_T_le_eabi.lib : copy_decompress_rle.obj (.text:decompress:rle24)
+                  00001bb4    00000004     driverlib-cm3.lib : pwm.obj (.text:PWMSyncUpdate)
+                  00001bb8    00000004                       : timer.obj (.text:TimerIntClear)
+
+.const     0    00001bbc    0000044f     
+                  00001bbc    000001e0     rit128x96x4.obj (.const:g_pucFont)
+                  00001d9c    000000f0     sounds.obj (.const:g_pusFireEffect)
+                  00001e8c    00000070     driverlib-cm3.lib : interrupt.obj (.const)
+                  00001efc    0000006c                       : sysctl.obj (.const:g_pulXtals)
+                  00001f68    0000004f     rit128x96x4.obj (.const:g_pucRIT128x96x4Init)
+                  00001fb7    00000001     --HOLE-- [fill = 0]
+                  00001fb8    00000040     driverlib-cm3.lib : sysctl.obj (.const)
+                  00001ff8    0000000c     rit128x96x4.obj (.const)
+                  00002004    00000007     timers.obj (.const)
+
+.cinit     0    00002010    00000050     
+                  00002010    00000028     (.cinit..data.load) [load image, compression = rle]
+                  00002038    0000000c     (__TI_handler_table)
+                  00002044    00000004     --HOLE-- [fill = 0]
+                  00002048    00000008     (.cinit..bss.load) [load image, compression = zero_init]
+                  00002050    00000010     (__TI_cinit_table)
+
+.stack     0    20000000    00000200     UNINITIALIZED
+                  20000000    00000200     --HOLE--
+
+.sysmem    0    20000200    00000200     UNINITIALIZED
+                  20000200    00000008     rtsv7M3_T_le_eabi.lib : memory.obj (.sysmem)
+                  20000208    000001f8     --HOLE--
+
+.data      0    20000400    00000074     
+                  20000400    00000048     timers.obj (.data)
+                  20000448    0000000c     audio.obj (.data)
+                  20000454    0000000c     rtsv7M3_T_le_eabi.lib : memory.obj (.data)
+                  20000460    00000008                           : _lock.obj (.data)
+                  20000468    00000008                           : exit.obj (.data)
+                  20000470    00000004                           : stkdepth_vars.obj (.data)
+
+.bss       0    20000474    00000018     UNINITIALIZED
+                  20000474    0000000c     rit128x96x4.obj (.bss)
+                  20000480    00000008     audio.obj (.bss)
+                  20000488    00000004     timers.obj (.bss)
+
+
+LINKER GENERATED COPY TABLES
+
+__TI_cinit_table @ 00002050 records: 2, size/record: 8, table size: 16
+	.data: load addr=00002010, load size=00000028 bytes, run addr=20000400, run size=00000074 bytes, compression=rle
+	.bss: load addr=00002048, load size=00000008 bytes, run addr=20000474, run size=00000018 bytes, compression=zero_init
+
+
+LINKER GENERATED HANDLER TABLE
+
+__TI_handler_table @ 00002038 records: 3, size/record: 4, table size: 12
+	index: 0, handler: __TI_decompress_rle24
+	index: 1, handler: __TI_decompress_none
+	index: 2, handler: __TI_zero_init
+
+
+GLOBAL SYMBOLS: SORTED ALPHABETICALLY BY Name 
+
+address    name
+--------   ----
+00000fc1   AudioHandler
+00001945   AudioOn
+00001805   AudioPlaySound
+000016bd   AudioVolume
+000019f1   ButtonUp
+0000188d   C$$EXIT
+00001b29   CPUcpsid
+00001b35   CPUcpsie
+00001975   GPIODirModeSet
+000010b1   GPIOPadConfigSet
+00001b97   GPIOPinRead
+00001a91   GPIOPinTypeGPIOInput
+00001aa3   GPIOPinTypeGPIOOutput
+00001ab5   GPIOPinTypePWM
+00001ac7   GPIOPinTypeSSI
+00001b9d   GPIOPinWrite
+00001595   IntEnable
+00001b41   IntMasterDisable
+00001b4b   IntMasterEnable
+000019a3   PWMGenConfigure
+00001b55   PWMGenDisable
+00001b5f   PWMGenEnable
+00001a69   PWMGenPeriodSet
+00001a3d   PWMOutputInvert
+00001a53   PWMOutputState
+00001bb5   PWMSyncUpdate
+00001525   RIT128x96x4Clear
+00001afd   RIT128x96x4DisplayOff
+000015f9   RIT128x96x4Enable
+00001179   RIT128x96x4Init
+00000d39   RIT128x96x4StringDraw
+00001ba3   ResetISR
+UNDEFED    SHT$$INIT_ARRAY$$Base
+UNDEFED    SHT$$INIT_ARRAY$$Limit
+00001b87   SSIBusy
+00001849   SSIConfigSetExpClk
+00001b69   SSIDataPut
+00001b73   SSIDisable
+00001b7d   SSIEnable
+00000ba1   SysCtlClockGet
+00000e7d   SysCtlClockSet
+00001ba9   SysCtlDelay
+00001a7d   SysCtlPWMClockSet
+00001715   SysCtlPeripheralEnable
+000004d1   Timer0IntHandler
+000019cd   TimerConfigure
+00001b0d   TimerEnable
+00001bb9   TimerIntClear
+00001b8f   TimerIntEnable
+00001ad9   TimerLoadSet
+0000176d   ValidButtonCombo
+20000200   __STACK_END
+00000200   __STACK_SIZE
+20000100   __STACK_TOP
+00000200   __SYSMEM_SIZE
+00002050   __TI_CINIT_Base
+00002060   __TI_CINIT_Limit
+00002038   __TI_Handler_Table_Base
+00002044   __TI_Handler_Table_Limit
+00000001   __TI_args_main
+00001491   __TI_auto_init
+00001b1b   __TI_decompress_none
+00001baf   __TI_decompress_rle24
+00000000   __TI_static_base__
+00001aeb   __TI_zero_init
+00001239   __aeabi_memcpy
+00001239   __aeabi_memcpy4
+00001239   __aeabi_memcpy8
+ffffffff   __binit__
+ffffffff   __c_args__
+20000000   __stack
+00001a25   _args_main
+00001911   _c_int00
+20000468   _cleanup_ptr
+2000046c   _dtors_ptr
+20000460   _lock
+00001a19   _nop
+00001a13   _register_lock
+00001a0d   _register_unlock
+20000200   _sys_memory
+20000464   _unlock
+00001891   abort
+2000041c   alarmHours
+20000418   alarmMinutes
+20000420   alarmOn
+20000430   alarmReset
+2000042c   alarmTriggered
+20000434   b0_S
+20000438   b1_S
+2000043c   b2_S
+20000440   b3_S
+20000444   b4_S
+ffffffff   binit
+00000493   calloc
+000017bd   copy_in
+00001899   exit
+20000404   first
+000001df   free
+00000000   g_pfnVectors
+00001d9c   g_pusFireEffect
+20000488   g_ulSystemClock
+000013fd   intToString
+00000859   main
+20000470   main_func_sp
+0000017d   malloc
+000003bd   memalign
+00001239   memcpy
+000000f1   minit
+000002a9   realloc
+20000424   showAlarm
+20000428   showTime
+20000400   tick
+20000414   timeHours
+20000410   timeMinutes
+20000408   timePartial
+2000040c   timeSeconds
+00002004   timerDivisor
+
+
+GLOBAL SYMBOLS: SORTED BY Symbol Address 
+
+address    name
+--------   ----
+00000000   __TI_static_base__
+00000000   g_pfnVectors
+00000001   __TI_args_main
+000000f1   minit
+0000017d   malloc
+000001df   free
+00000200   __STACK_SIZE
+00000200   __SYSMEM_SIZE
+000002a9   realloc
+000003bd   memalign
+00000493   calloc
+000004d1   Timer0IntHandler
+00000859   main
+00000ba1   SysCtlClockGet
+00000d39   RIT128x96x4StringDraw
+00000e7d   SysCtlClockSet
+00000fc1   AudioHandler
+000010b1   GPIOPadConfigSet
+00001179   RIT128x96x4Init
+00001239   __aeabi_memcpy
+00001239   __aeabi_memcpy4
+00001239   __aeabi_memcpy8
+00001239   memcpy
+000013fd   intToString
+00001491   __TI_auto_init
+00001525   RIT128x96x4Clear
+00001595   IntEnable
+000015f9   RIT128x96x4Enable
+000016bd   AudioVolume
+00001715   SysCtlPeripheralEnable
+0000176d   ValidButtonCombo
+000017bd   copy_in
+00001805   AudioPlaySound
+00001849   SSIConfigSetExpClk
+0000188d   C$$EXIT
+00001891   abort
+00001899   exit
+00001911   _c_int00
+00001945   AudioOn
+00001975   GPIODirModeSet
+000019a3   PWMGenConfigure
+000019cd   TimerConfigure
+000019f1   ButtonUp
+00001a0d   _register_unlock
+00001a13   _register_lock
+00001a19   _nop
+00001a25   _args_main
+00001a3d   PWMOutputInvert
+00001a53   PWMOutputState
+00001a69   PWMGenPeriodSet
+00001a7d   SysCtlPWMClockSet
+00001a91   GPIOPinTypeGPIOInput
+00001aa3   GPIOPinTypeGPIOOutput
+00001ab5   GPIOPinTypePWM
+00001ac7   GPIOPinTypeSSI
+00001ad9   TimerLoadSet
+00001aeb   __TI_zero_init
+00001afd   RIT128x96x4DisplayOff
+00001b0d   TimerEnable
+00001b1b   __TI_decompress_none
+00001b29   CPUcpsid
+00001b35   CPUcpsie
+00001b41   IntMasterDisable
+00001b4b   IntMasterEnable
+00001b55   PWMGenDisable
+00001b5f   PWMGenEnable
+00001b69   SSIDataPut
+00001b73   SSIDisable
+00001b7d   SSIEnable
+00001b87   SSIBusy
+00001b8f   TimerIntEnable
+00001b97   GPIOPinRead
+00001b9d   GPIOPinWrite
+00001ba3   ResetISR
+00001ba9   SysCtlDelay
+00001baf   __TI_decompress_rle24
+00001bb5   PWMSyncUpdate
+00001bb9   TimerIntClear
+00001d9c   g_pusFireEffect
+00002004   timerDivisor
+00002038   __TI_Handler_Table_Base
+00002044   __TI_Handler_Table_Limit
+00002050   __TI_CINIT_Base
+00002060   __TI_CINIT_Limit
+20000000   __stack
+20000100   __STACK_TOP
+20000200   __STACK_END
+20000200   _sys_memory
+20000400   tick
+20000404   first
+20000408   timePartial
+2000040c   timeSeconds
+20000410   timeMinutes
+20000414   timeHours
+20000418   alarmMinutes
+2000041c   alarmHours
+20000420   alarmOn
+20000424   showAlarm
+20000428   showTime
+2000042c   alarmTriggered
+20000430   alarmReset
+20000434   b0_S
+20000438   b1_S
+2000043c   b2_S
+20000440   b3_S
+20000444   b4_S
+20000460   _lock
+20000464   _unlock
+20000468   _cleanup_ptr
+2000046c   _dtors_ptr
+20000470   main_func_sp
+20000488   g_ulSystemClock
+ffffffff   __binit__
+ffffffff   __c_args__
+ffffffff   binit
+UNDEFED    SHT$$INIT_ARRAY$$Base
+UNDEFED    SHT$$INIT_ARRAY$$Limit
+
+[117 symbols]
