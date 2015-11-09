@@ -1,3 +1,3 @@
 # Tetris #
 
-Tetris for the TI LMS8962 ARM Cortex M3
+Tetris for the TI LMS8962 ARM Cortex M3.
