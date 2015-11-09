@@ -1,0 +1,4 @@
+Screen resolution: 128x96
+
+To convert 24bit to 4bit bmp with ImageMagick:
+    convert <source.bmp> -depth 4 -colorspace GRAY -type Grayscale <target.bmp>

@@ -97,7 +97,7 @@ void Timer0IntHandler(void)
     int b4_t = !((buttons & 16) >> 4);
     if(ValidButtonCombo(b0_t, b1_t, b2_t, b3_t, b4_t))
     {
-
+        // TODO update game state
     }
 
     if(ButtonChanged(b0_t, b0)
@@ -200,15 +200,20 @@ int main(void)
     //RIT128x96x4StringDraw(pTimeHours, 0, 0, 15);
     //AudioPlaySound(g_pusFireEffect, sizeof(g_pusFireEffect) / 2);
 
-    unsigned char *pucRow = (unsigned char *)&logo[BITMAP_HEADER_SIZE];
-    unsigned long logoHeight = (unsigned long)logo[BITMAP_HEIGHT_OFFSET];
-    unsigned long logoWidth = (unsigned long)logo[BITMAP_WIDTH_OFFSET];
-    unsigned long row;
-    for(row = 0; row < logoHeight; row++)
+    // Draw test grid TODO: remove
+    unsigned char *bmp = (unsigned char *)&block[BITMAP_HEADER_SIZE];
+    unsigned long height = (unsigned long)block[BITMAP_HEIGHT_OFFSET];
+    unsigned long width = (unsigned long)block[BITMAP_WIDTH_OFFSET];
+
+    int i, j; // C89 sucks
+    for(i = 0; i < 20; i++)
     {
-        RIT128x96x4ImageDraw(pucRow, ((128 - logoWidth) / 2),
-                             (80 - row), logoWidth, 1);
-        pucRow += (logoWidth / 2);
+    	int y = 16 + (height * i);
+        for(j = 0; j < 10; j++)
+        {
+        	int x = 44 + (width * j);
+            RIT128x96x4ImageDraw(bmp, x, y, width, height);
+        }
     }
 
     IntMasterEnable();
