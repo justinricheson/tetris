@@ -185,34 +185,34 @@ int * Copy(const int *src, int len)
 
 int CheckPosition(int *shape, int shapeSize, int newX, int newY)
 {
-	int i, j;
-	for(i = 0; i < shapeSize; i++)
-	{
-		for(j = 0; j < shapeSize; j++)
-		{
-			if(shape[i * shapeSize + j])
-			{
-				int thisY = newY + i;
-				if(thisY < 0 || thisY > maxY)
-				{
-					return 0;
-				}
+    int i, j;
+    for(i = 0; i < shapeSize; i++)
+    {
+        for(j = 0; j < shapeSize; j++)
+        {
+            if(shape[i * shapeSize + j])
+            {
+                int thisY = newY + i;
+                if(thisY < 0 || thisY > maxY)
+                {
+                    return 0;
+                }
 
-				int thisX = newX + j;
-				if(thisX < 0 || thisX > maxX)
-				{
-					return 0;
-				}
+                int thisX = newX + j;
+                if(thisX < 0 || thisX > maxX)
+                {
+                    return 0;
+                }
 
-				if(grid[(newX * (maxX + 1)) + (i * (maxX + 1)) + newY + j])
-				{
-					return 0;
-				}
-			}
-		}
-	}
+                if(grid[(newX * (maxX + 1)) + (i * (maxX + 1)) + newY + j])
+                {
+                    return 0;
+                }
+            }
+        }
+    }
 
-	return 1;
+    return 1;
 }
 
 int GetNextOrientation()
@@ -242,13 +242,24 @@ int TryChangeOrientation()
 
     if(CheckPosition(&copy[0], shapeDefSize, locationX, locationY))
     {
-    	free(shapeDef);
-    	shapeDef = copy;
-    	return 1;
+        free(shapeDef);
+        shapeDef = copy;
+        return 1;
     }
 
-	free(copy);
-	return 0;
+    free(copy);
+    return 0;
+}
+
+int TryMove(int newX, int newY)
+{
+    if(CheckPosition(&shapeDef[0], shapeDefSize, newX, newY))
+    {
+    	locationX = newX;
+    	locationY = newY;
+        return 1;
+    }
+    return 0;
 }
 
 void Timer0IntHandler(void)
@@ -276,6 +287,27 @@ void Timer0IntHandler(void)
                 tick = 1;
             }
         }
+        if(ButtonDown(b2_t, b2))
+        {
+        	if(TryMove(locationX - 1, locationY))
+        	{
+        		tick = 1;
+        	}
+        }
+        if(ButtonDown(b3_t, b3))
+        {
+        	if(TryMove(locationX + 1, locationY))
+        	{
+        		tick = 1;
+        	}
+        }
+        if(ButtonDown(b1_t, b1))
+        {
+        	if(TryMove(locationX, locationY + 1))
+        	{
+        		tick = 1;
+        	}
+        }
     }
 
     // Store button states
@@ -289,7 +321,7 @@ void Timer0IntHandler(void)
     if(first)
     {
         // TODO remove test code
-    	shape = S_I;
+        shape = S_I;
         shapeDefSize = 4;
         shapeDef = Copy(&SD_I[0], shapeDefSize * shapeDefSize);
         locationX = 7;
