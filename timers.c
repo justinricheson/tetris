@@ -45,6 +45,8 @@ int first = 1;
 
 // Game state
 int shape = -1;
+int *shapeDef = NULL;
+int shapeDefSize = 0;
 int orientation = -1;
 int locationX = -1;
 int locationY = -1;
@@ -62,6 +64,8 @@ const int height = 4;
 const int width = 4;
 const int xOffset = 44;
 const int yOffset = 16;
+const int maxX = 9;
+const int maxY = 19;
 
 char * intToString(int input)
 {
@@ -124,92 +128,14 @@ inline int ButtonChanged(int curValue, int preValue)
     return curValue != preValue;
 }
 
-inline int ValidButtonCombo(int b0, int b1, int b2, int b3, int b4)
+inline int ValidButtonCombo(int b0_t, int b1_t, int b2_t, int b3_t, int b4_t)
 {
-    if(b0)
+    if(b0_t)
     {
         return 0;
     }
 
-    int numPressed = b1 + b2 + b3 + b4;
-
-    if(b4)
-    {
-        return numPressed <= 2; // Select can be pressed alone of with any direction button
-    }
-
-    // Otherwise, at most one button can be pressed at a time
-    return numPressed <= 1;
-}
-
-void Timer0IntHandler(void)
-{
-    TimerIntClear(TIMER0_BASE, TIMER_TIMA_TIMEOUT);
-
-    //AudioHandler(); // Play sounds
-
-    // Get button states
-    unsigned long buttons;
-    buttons = (GPIOPinRead(GPIO_PORTE_BASE, (GPIO_PIN_0 | GPIO_PIN_1 | GPIO_PIN_2 | GPIO_PIN_3)) |
-              (GPIOPinRead(GPIO_PORTF_BASE,  GPIO_PIN_1) << 3));
-
-    int b0_t = !(buttons & 1);
-    int b1_t = !((buttons & 2) >> 1);
-    int b2_t = !((buttons & 4) >> 2);
-    int b3_t = !((buttons & 8) >> 3);
-    int b4_t = !((buttons & 16) >> 4);
-    if(ValidButtonCombo(b0_t, b1_t, b2_t, b3_t, b4_t))
-    {
-        if(ButtonUp(b4_t, b4))
-        {
-            if(orientation == O_000)
-            {
-                orientation = O_090;
-            }
-            else if(orientation == O_090)
-            {
-                orientation = O_180;
-            }
-            else if(orientation == O_180)
-            {
-                orientation = O_270;
-            }
-            else
-            {
-                orientation = O_000;
-            }
-
-            tick = 1;
-        }
-
-        int down = 0;
-        if(ButtonDown(b1_t, b1))
-        {
-            shape = S_T; down = 1;
-        }
-
-        if(down)
-        {
-            orientation = O_000;
-            locationX = 5;
-            locationY = 10;
-            tick = 1;
-        }
-    }
-
-    // Store button states
-    b0 = b0_t;
-    b1 = b1_t;
-    b2 = b2_t;
-    b3 = b3_t;
-    b4 = b4_t;
-
-    // Trigger the event the first time so the initial screen is drawn
-    if(first)
-    {
-        first = 0;
-        tick = 1; // Signal event
-    }
+    return b1_t + b2_t + b3_t + b4_t <= 1;
 }
 
 void Transpose(int *a, int *b, int *c, int *d)
@@ -233,20 +159,145 @@ void Rotate(int *m, int n)
     }
 }
 
-void RotateShape(int *m, int n)
+void RotateShape(int *m, int n, int newOrientation)
 {
     int rotations =
         shape == S_O ? 0 :
-        (shape == S_I || shape == S_S || shape == S_Z) && (orientation == O_000 || orientation == O_180) ? 0 :
+        (shape == S_I || shape == S_S || shape == S_Z) && (newOrientation == O_000 || newOrientation == O_180) ? 0 :
         (shape == S_I || shape == S_S || shape == S_Z) ? 1 :
-        orientation == O_000 ? 0 :
-        orientation == O_090 ? 1 :
-        orientation == O_180 ? 2 : 3;
+        newOrientation == O_000 ? 0 :
+        newOrientation == O_090 ? 1 :
+        newOrientation == O_180 ? 2 : 3;
 
     int i;
     for(i = 0; i < rotations; i++)
     {
         Rotate(m, n);
+    }
+}
+
+int * Copy(const int *src, int len)
+{
+    int *copy = malloc(len * sizeof(int));
+    memcpy(copy, src, len * sizeof(int));
+    return copy;
+}
+
+int CheckPosition(int *shape, int shapeSize, int newX, int newY)
+{
+	int i, j;
+	for(i = 0; i < shapeSize; i++)
+	{
+		for(j = 0; j < shapeSize; j++)
+		{
+			if(shape[i * shapeSize + j])
+			{
+				int thisY = newY + i;
+				if(thisY < 0 || thisY > maxY)
+				{
+					return 0;
+				}
+
+				int thisX = newX + j;
+				if(thisX < 0 || thisX > maxX)
+				{
+					return 0;
+				}
+
+				if(grid[(newX * (maxX + 1)) + (i * (maxX + 1)) + newY + j])
+				{
+					return 0;
+				}
+			}
+		}
+	}
+
+	return 1;
+}
+
+int GetNextOrientation()
+{
+    if(orientation == O_000)
+    {
+        return O_090;
+    }
+    else if(orientation == O_090)
+    {
+        return O_180;
+    }
+    else if(orientation == O_180)
+    {
+        return O_270;
+    }
+
+    return  O_000;
+}
+
+int TryChangeOrientation()
+{
+    int next = GetNextOrientation();
+
+    int *copy = Copy(&shapeDef[0], shapeDefSize * shapeDefSize);
+    RotateShape(copy, shapeDefSize, next);
+
+    if(CheckPosition(&copy[0], shapeDefSize, locationX, locationY))
+    {
+    	free(shapeDef);
+    	shapeDef = copy;
+    	return 1;
+    }
+
+	free(copy);
+	return 0;
+}
+
+void Timer0IntHandler(void)
+{
+    TimerIntClear(TIMER0_BASE, TIMER_TIMA_TIMEOUT);
+
+    //AudioHandler(); // Play sounds
+
+    // Get button states
+    unsigned long buttons;
+    buttons = (GPIOPinRead(GPIO_PORTE_BASE, (GPIO_PIN_0 | GPIO_PIN_1 | GPIO_PIN_2 | GPIO_PIN_3)) |
+              (GPIOPinRead(GPIO_PORTF_BASE,  GPIO_PIN_1) << 3));
+
+    int b0_t = !(buttons & 1);
+    int b1_t = !((buttons & 2) >> 1);
+    int b2_t = !((buttons & 4) >> 2);
+    int b3_t = !((buttons & 8) >> 3);
+    int b4_t = !((buttons & 16) >> 4);
+    if(ValidButtonCombo(b0_t, b1_t, b2_t, b3_t, b4_t))
+    {
+        if(ButtonUp(b4_t, b4))
+        {
+            if(TryChangeOrientation())
+            {
+                tick = 1;
+            }
+        }
+    }
+
+    // Store button states
+    b0 = b0_t;
+    b1 = b1_t;
+    b2 = b2_t;
+    b3 = b3_t;
+    b4 = b4_t;
+
+    // Trigger the event the first time so the initial screen is drawn
+    if(first)
+    {
+        // TODO remove test code
+    	shape = S_I;
+        shapeDefSize = 4;
+        shapeDef = Copy(&SD_I[0], shapeDefSize * shapeDefSize);
+        locationX = 7;
+        locationY = 10;
+        orientation = O_000;
+
+        first = 0;
+        tick = 1; // Signal event
     }
 }
 
@@ -267,7 +318,7 @@ void DrawShape(int *m, int rows, int cols, int x, int y, unsigned char *bufferT,
             {
                 RIT128x96x4ImageDraw(bufferT, xAbs, yAbs, width, height);
             }
-            else
+            else if(bufferF)
             {
                 RIT128x96x4ImageDraw(bufferF, xAbs, yAbs, width, height);
             }
@@ -275,64 +326,16 @@ void DrawShape(int *m, int rows, int cols, int x, int y, unsigned char *bufferT,
     }
 }
 
-int * Copy(const int *src, int len)
-{
-    int *copy = malloc(len * sizeof(int));
-    memcpy(copy, src, len * sizeof(int));
-    return copy;
-}
-
 void DrawGame()
 {
     unsigned char *bmpBlock = (unsigned char *)&block[0];
-    unsigned char *bmpClear = (unsigned char *)&clearblock[0];
+    unsigned char *bmpClear = (unsigned char *)&clear[0];
 
     DrawShape(grid, 20, 10, 0, 0, bmpBlock, bmpClear);
 
-    // Draw current shape
-    int *shapeDef;
-    int size = 0;
-    if(shape == S_O)
+    if(shapeDefSize)
     {
-        size = 2;
-        shapeDef = Copy(&SD_O[0], size*size);
-    }
-    else if(shape == S_I)
-    {
-        size = 4;
-        shapeDef = Copy(&SD_I[0], size*size);
-    }
-    else if(shape == S_S)
-    {
-        size = 3;
-        shapeDef = Copy(&SD_S[0], size*size);
-    }
-    else if(shape == S_Z)
-    {
-        size = 3;
-        shapeDef = Copy(&SD_Z[0], size*size);
-    }
-    else if(shape == S_L)
-    {
-        size = 3;
-        shapeDef = Copy(&SD_L[0], size*size);
-    }
-    else if(shape == S_J)
-    {
-        size = 3;
-        shapeDef = Copy(&SD_J[0], size*size);
-    }
-    else if(shape == S_T)
-    {
-        size = 3;
-        shapeDef = Copy(&SD_T[0], size*size);
-    }
-
-    if(size)
-    {
-        RotateShape(shapeDef, size);
-        DrawShape(shapeDef, size, size, locationX, locationY, bmpBlock, bmpClear);
-        free(shapeDef);
+        DrawShape(shapeDef, shapeDefSize, shapeDefSize, locationX, locationY, bmpBlock, NULL);
     }
 }
 
@@ -344,6 +347,9 @@ int main(void)
 
     // Init screen
     RIT128x96x4Init(1000000);
+    unsigned char *bmpWall = (unsigned char *)&wall[0];
+    RIT128x96x4ImageDraw(bmpWall, xOffset - 2, 0, 2, 96);
+    RIT128x96x4ImageDraw(bmpWall, xOffset + 40, 0, 2, 96);
 
     // Get system clock
     g_ulSystemClock = SysCtlClockGet();

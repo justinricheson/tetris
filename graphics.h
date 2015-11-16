@@ -1,8 +1,9 @@
 #ifndef GRAPHICS_H_
 #define GRAPHICS_H_
 
+extern const unsigned char wall[];
 extern const unsigned char block[];
-extern const unsigned char clearblock[];
+extern const unsigned char clear[];
 
 extern const int SD_O[4];
 extern const int SD_I[16];
