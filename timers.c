@@ -53,6 +53,7 @@ int locationX = -1;
 int locationY = -1;
 int grid[200] = { 0 };
 int score = 0;
+int tetris = 0;
 
 // Button states
 int b0 = 0; // D
@@ -68,42 +69,6 @@ const int xOffset = 44;
 const int yOffset = 16;
 const int maxX = 9;
 const int maxY = 19;
-
-inline char * intToString(int input)
-{
-    // Convert int to char pointer
-    // Only works with non-negative values 0 - 99
-    int flag = 0;
-    int i = 1;
-    char str[3] = { '0', '0', '\0' };
-    while(input != 0)
-    {
-        str[i--] = (input % 10) + '0';
-        input /= 10;
-        flag = 1;
-    }
-
-    if(!flag) // Input == 0
-    {
-        return "00";
-    }
-
-    char *result = malloc(3);
-    if(result == NULL)
-    {
-        return NULL;
-    }
-
-    { // Additional scope so we don't need to define j up top, CC Studio is C89
-        int j;
-        for(j = 0; j < 3; j++)
-        {
-            result[j] = str[j];
-        }
-    }
-
-    return result;
-}
 
 inline int ButtonUp(int curValue, int preValue)
 {
@@ -327,7 +292,27 @@ inline int ClearLines()
 
 inline void UpdateScore(int numLines)
 {
+	if(numLines == 0)
+	{
+		score += 10;
+		return;
+	}
+	if(numLines == 4)
+	{
+		if(tetris)
+		{
+			score += 1200;
+		}
+		else
+		{
+			tetris = 1;
+			score += 800;
+		}
+		return;
+	}
 
+	tetris = 0;
+	score += numLines * 100;
 }
 
 void Timer0IntHandler(void)
@@ -422,6 +407,42 @@ void Timer0IntHandler(void)
     }
 }
 
+inline char * IntToString(int input)
+{
+    // Convert int to char pointer
+    // Only works with non-negative values 0 - 99999
+    int flag = 0;
+    int i = 4;
+    char str[6] = { '0', '0', '0', '0', '0', '\0' };
+    while(input != 0)
+    {
+        str[i--] = (input % 10) + '0';
+        input /= 10;
+        flag = 1;
+    }
+
+    if(!flag) // Input == 0
+    {
+        return "00000";
+    }
+
+    char *result = malloc(6);
+    if(result == NULL)
+    {
+        return NULL;
+    }
+
+    { // Additional scope so we don't need to define j up top, CC Studio is C89
+        int j;
+        for(j = 0; j < 6; j++)
+        {
+            result[j] = str[j];
+        }
+    }
+
+    return result;
+}
+
 inline void DrawShape(int *m, int rows, int cols, int x, int y, unsigned char *bufferT, unsigned char *bufferF)
 {
     int startX = xOffset + (width * x);
@@ -458,6 +479,11 @@ inline void DrawGame()
     {
         DrawShape(shapeDef, shapeDefSize, shapeDefSize, locationX, locationY, bmpBlock, NULL);
     }
+
+    char *scoreSt = IntToString(score);
+    RIT128x96x4StringDraw("Score:", 0, 70, 15);
+    RIT128x96x4StringDraw(scoreSt, 0, 80, 15);
+    free(scoreSt);
 }
 
 int main(void)
@@ -499,8 +525,6 @@ int main(void)
     GPIOPinTypePWM(GPIO_PORTG_BASE, GPIO_PIN_1);
     AudioOn();
 
-    //char *pTimeHours = intToString(hours);
-    //RIT128x96x4StringDraw(pTimeHours, 0, 0, 15);
     //AudioPlaySound(g_pusFireEffect, sizeof(g_pusFireEffect) / 2);
 
     IntMasterEnable();
