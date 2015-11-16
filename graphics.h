@@ -6,5 +6,6 @@
 #define BITMAP_HEIGHT_OFFSET 0x16
 
 extern const unsigned char block[];
+extern const unsigned char clearblock[];
 
 #endif

@@ -20,6 +20,22 @@ void __error__(char *pcFilename, unsigned long ulLine)
 }
 #endif
 
+// Shapes
+#define S_O 0;
+#define S_I 1;
+#define S_S 2;
+#define S_Z 3;
+#define S_L 4;
+#define S_J 5;
+#define S_T 6;
+
+// Orientations
+#define O_000 = 0;
+#define O_090 = 1;
+#define O_180 = 2;
+#define O_270 = 3;
+
+// Timer stuff
 unsigned long g_ulSystemClock;
 const int timerDivisor = 100;
 
@@ -28,6 +44,33 @@ int tick = 0;
 int first = 1;
 
 // Game State
+int shape = -1;
+int orientation = -1;
+int x = -1;
+int y = -1;
+int grid[20][10] =
+{
+    { 0, 1, 0, 1, 0, 1, 0, 1, 0, 1 },
+    { 1, 0, 1, 0, 1, 0, 1, 0, 1, 0 },
+    { 0, 1, 0, 1, 0, 1, 0, 1, 0, 1 },
+    { 1, 0, 1, 0, 1, 0, 1, 0, 1, 0 },
+    { 0, 1, 0, 1, 0, 1, 0, 1, 0, 1 },
+    { 1, 0, 1, 0, 1, 0, 1, 0, 1, 0 },
+    { 0, 1, 0, 1, 0, 1, 0, 1, 0, 1 },
+    { 1, 0, 1, 0, 1, 0, 1, 0, 1, 0 },
+    { 0, 1, 0, 1, 0, 1, 0, 1, 0, 1 },
+    { 1, 0, 1, 0, 1, 0, 1, 0, 1, 0 },
+    { 0, 1, 0, 1, 0, 1, 0, 1, 0, 1 },
+    { 1, 0, 1, 0, 1, 0, 1, 0, 1, 0 },
+    { 0, 1, 0, 1, 0, 1, 0, 1, 0, 1 },
+    { 1, 0, 1, 0, 1, 0, 1, 0, 1, 0 },
+    { 0, 1, 0, 1, 0, 1, 0, 1, 0, 1 },
+    { 1, 0, 1, 0, 1, 0, 1, 0, 1, 0 },
+    { 0, 1, 0, 1, 0, 1, 0, 1, 0, 1 },
+    { 1, 0, 1, 0, 1, 0, 1, 0, 1, 0 },
+    { 0, 1, 0, 1, 0, 1, 0, 1, 0, 1 },
+    { 1, 0, 1, 0, 1, 0, 1, 0, 1, 0 }
+};
 
 // Button States
 int b0 = 0; // D
@@ -35,6 +78,42 @@ int b1 = 0; // U
 int b2 = 0; // L
 int b3 = 0; // R
 int b4 = 0; // RR
+
+char * intToString(int input)
+{
+    // Convert int to char pointer
+    // Only works with non-negative values 0 - 99
+    int flag = 0;
+    int i = 1;
+    char str[3] = { '0', '0', '\0' };
+    while(input != 0)
+    {
+        str[i--] = (input % 10) + '0';
+        input /= 10;
+        flag = 1;
+    }
+
+    if(!flag) // Input == 0
+    {
+        return "00";
+    }
+
+    char *result = malloc(3);
+    if(result == NULL)
+    {
+        return NULL;
+    }
+
+    { // Additional scope so we don't need to define j up top, CC Studio is C89
+        int j;
+        for(j = 0; j < 3; j++)
+        {
+            result[j] = str[j];
+        }
+    }
+
+    return result;
+}
 
 inline int ButtonUp(int curValue, int preValue)
 {
@@ -83,7 +162,7 @@ void Timer0IntHandler(void)
 {
     TimerIntClear(TIMER0_BASE, TIMER_TIMA_TIMEOUT);
 
-    AudioHandler(); // Play sounds
+    //AudioHandler(); // Play sounds
 
     // Get button states
     unsigned long buttons;
@@ -98,15 +177,18 @@ void Timer0IntHandler(void)
     if(ValidButtonCombo(b0_t, b1_t, b2_t, b3_t, b4_t))
     {
         // TODO update game state
-    }
-
-    if(ButtonChanged(b0_t, b0)
-    || ButtonChanged(b1_t, b1)
-    || ButtonChanged(b2_t, b2)
-    || ButtonChanged(b3_t, b3)
-    || ButtonChanged(b4_t, b4))
-    {
-        tick = 1;
+    	if(ButtonDown(b1_t, b1))
+    	{
+    		int i, j;
+    		for(i = 0; i < 20; i++)
+    		{
+    			for(j = 0; j < 10; j++)
+    			{
+    				grid[i][j] = !grid[i][j];
+    			}
+    		}
+    		tick = 1;
+    	}
     }
 
     // Store button states
@@ -124,40 +206,31 @@ void Timer0IntHandler(void)
     }
 }
 
-char * intToString(int input)
+void DrawGame()
 {
-    // Convert int to char pointer
-    // Only works with non-negative values 0 - 99
-    int flag = 0;
-    int i = 1;
-    char str[3] = { '0', '0', '\0' };
-    while(input != 0)
-    {
-        str[i--] = (input % 10) + '0';
-        input /= 10;
-        flag = 1;
-    }
+	unsigned long height = (unsigned long)block[BITMAP_HEIGHT_OFFSET];
+	unsigned long width = (unsigned long)block[BITMAP_WIDTH_OFFSET];
+	unsigned char *bmpBlock = (unsigned char *)&block[BITMAP_HEADER_SIZE];
+	unsigned char *bmpClear = (unsigned char *)&clearblock[BITMAP_HEADER_SIZE];
 
-    if(!flag) // Input == 0
-    {
-        return "00";
-    }
+	int i, j; // C89 sucks
+	for(i = 0; i < 20; i++)
+	{
+		int y = 16 + (height * i);
+		for(j = 0; j < 10; j++)
+		{
+			int x = 44 + (width * j);
 
-    char *result = malloc(3);
-    if(result == NULL)
-    {
-        return NULL;
-    }
-
-    { // Additional scope so we don't need to define j up top, CC Studio is C89
-        int j;
-        for(j = 0; j < 3; j++)
-        {
-            result[j] = str[j];
-        }
-    }
-
-    return result;
+			if(grid[i][j])
+			{
+				RIT128x96x4ImageDraw(bmpBlock, x, y, width, height);
+			}
+			else
+			{
+				RIT128x96x4ImageDraw(bmpClear, x, y, width, height);
+			}
+		}
+	}
 }
 
 int main(void)
@@ -200,22 +273,6 @@ int main(void)
     //RIT128x96x4StringDraw(pTimeHours, 0, 0, 15);
     //AudioPlaySound(g_pusFireEffect, sizeof(g_pusFireEffect) / 2);
 
-    // Draw test grid TODO: remove
-    unsigned char *bmp = (unsigned char *)&block[BITMAP_HEADER_SIZE];
-    unsigned long height = (unsigned long)block[BITMAP_HEIGHT_OFFSET];
-    unsigned long width = (unsigned long)block[BITMAP_WIDTH_OFFSET];
-
-    int i, j; // C89 sucks
-    for(i = 0; i < 20; i++)
-    {
-    	int y = 16 + (height * i);
-        for(j = 0; j < 10; j++)
-        {
-        	int x = 44 + (width * j);
-            RIT128x96x4ImageDraw(bmp, x, y, width, height);
-        }
-    }
-
     IntMasterEnable();
     while(1)
     {
@@ -224,11 +281,7 @@ int main(void)
         IntMasterDisable();
         tick = 0; // Reset event flag
 
-        RIT128x96x4StringDraw(b0 ? "ON " : "OFF", 00, 0, 15);
-        RIT128x96x4StringDraw(b1 ? "ON " : "OFF", 20, 0, 15);
-        RIT128x96x4StringDraw(b2 ? "ON " : "OFF", 40, 0, 15);
-        RIT128x96x4StringDraw(b3 ? "ON " : "OFF", 60, 0, 15);
-        RIT128x96x4StringDraw(b4 ? "ON " : "OFF", 80, 0, 15);
+        DrawGame();
 
         IntMasterEnable();
     }
