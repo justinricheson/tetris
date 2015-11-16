@@ -21,19 +21,19 @@ void __error__(char *pcFilename, unsigned long ulLine)
 #endif
 
 // Shapes
-#define S_O 0;
-#define S_I 1;
-#define S_S 2;
-#define S_Z 3;
-#define S_L 4;
-#define S_J 5;
-#define S_T 6;
+#define S_O 0
+#define S_I 1
+#define S_S 2
+#define S_Z 3
+#define S_L 4
+#define S_J 5
+#define S_T 6
 
 // Orientations
-#define O_000 = 0;
-#define O_090 = 1;
-#define O_180 = 2;
-#define O_270 = 3;
+#define O_000 0
+#define O_090 1
+#define O_180 2
+#define O_270 3
 
 // Timer stuff
 unsigned long g_ulSystemClock;
@@ -46,31 +46,9 @@ int first = 1;
 // Game State
 int shape = -1;
 int orientation = -1;
-int x = -1;
-int y = -1;
-int grid[20][10] =
-{
-    { 0, 1, 0, 1, 0, 1, 0, 1, 0, 1 },
-    { 1, 0, 1, 0, 1, 0, 1, 0, 1, 0 },
-    { 0, 1, 0, 1, 0, 1, 0, 1, 0, 1 },
-    { 1, 0, 1, 0, 1, 0, 1, 0, 1, 0 },
-    { 0, 1, 0, 1, 0, 1, 0, 1, 0, 1 },
-    { 1, 0, 1, 0, 1, 0, 1, 0, 1, 0 },
-    { 0, 1, 0, 1, 0, 1, 0, 1, 0, 1 },
-    { 1, 0, 1, 0, 1, 0, 1, 0, 1, 0 },
-    { 0, 1, 0, 1, 0, 1, 0, 1, 0, 1 },
-    { 1, 0, 1, 0, 1, 0, 1, 0, 1, 0 },
-    { 0, 1, 0, 1, 0, 1, 0, 1, 0, 1 },
-    { 1, 0, 1, 0, 1, 0, 1, 0, 1, 0 },
-    { 0, 1, 0, 1, 0, 1, 0, 1, 0, 1 },
-    { 1, 0, 1, 0, 1, 0, 1, 0, 1, 0 },
-    { 0, 1, 0, 1, 0, 1, 0, 1, 0, 1 },
-    { 1, 0, 1, 0, 1, 0, 1, 0, 1, 0 },
-    { 0, 1, 0, 1, 0, 1, 0, 1, 0, 1 },
-    { 1, 0, 1, 0, 1, 0, 1, 0, 1, 0 },
-    { 0, 1, 0, 1, 0, 1, 0, 1, 0, 1 },
-    { 1, 0, 1, 0, 1, 0, 1, 0, 1, 0 }
-};
+int locationX = -1;
+int locationY = -1;
+int grid[20][10] = { 0 };
 
 // Button States
 int b0 = 0; // D
@@ -176,19 +154,49 @@ void Timer0IntHandler(void)
     int b4_t = !((buttons & 16) >> 4);
     if(ValidButtonCombo(b0_t, b1_t, b2_t, b3_t, b4_t))
     {
-        // TODO update game state
-    	if(ButtonDown(b1_t, b1))
-    	{
-    		int i, j;
-    		for(i = 0; i < 20; i++)
-    		{
-    			for(j = 0; j < 10; j++)
-    			{
-    				grid[i][j] = !grid[i][j];
-    			}
-    		}
-    		tick = 1;
-    	}
+        if(ButtonUp(b4_t, b4))
+        {
+            if(orientation == O_000)
+            {
+                orientation = O_090;
+            }
+            else if(orientation == O_090)
+            {
+                orientation = O_180;
+            }
+            else if(orientation == O_180)
+            {
+                orientation = O_270;
+            }
+            else
+            {
+                orientation = O_000;
+            }
+
+            tick = 1;
+        }
+
+        int down = 0;
+        if(ButtonDown(b1_t, b1))
+        {
+            shape = S_J; down = 1;
+        }
+        else if(ButtonDown(b2_t, b2))
+        {
+            shape = S_Z; down = 1;
+        }
+        else if(ButtonDown(b3_t, b3))
+        {
+            shape = S_L; down = 1;
+        }
+
+        if(down)
+        {
+            orientation = O_000;
+            locationX = 5;
+            locationY = 10;
+            tick = 1;
+        }
     }
 
     // Store button states
@@ -208,29 +216,189 @@ void Timer0IntHandler(void)
 
 void DrawGame()
 {
-	unsigned long height = (unsigned long)block[BITMAP_HEIGHT_OFFSET];
-	unsigned long width = (unsigned long)block[BITMAP_WIDTH_OFFSET];
-	unsigned char *bmpBlock = (unsigned char *)&block[BITMAP_HEADER_SIZE];
-	unsigned char *bmpClear = (unsigned char *)&clearblock[BITMAP_HEADER_SIZE];
+    unsigned int height = (unsigned long)block[BITMAP_HEIGHT_OFFSET];
+    unsigned int width = (unsigned long)block[BITMAP_WIDTH_OFFSET];
+    unsigned char *bmpBlock = (unsigned char *)&block[BITMAP_HEADER_SIZE];
+    unsigned char *bmpClear = (unsigned char *)&clearblock[BITMAP_HEADER_SIZE];
+    unsigned int xOffset = 44;
+    unsigned int yOffset = 16;
 
-	int i, j; // C89 sucks
-	for(i = 0; i < 20; i++)
-	{
-		int y = 16 + (height * i);
-		for(j = 0; j < 10; j++)
-		{
-			int x = 44 + (width * j);
+    // Draw grid
+    int i, j; // C89 sucks
+    for(i = 0; i < 20; i++)
+    {
+        int y = yOffset + (height * i);
+        for(j = 0; j < 10; j++)
+        {
+            int x = xOffset + (width * j);
 
-			if(grid[i][j])
-			{
-				RIT128x96x4ImageDraw(bmpBlock, x, y, width, height);
-			}
-			else
-			{
-				RIT128x96x4ImageDraw(bmpClear, x, y, width, height);
-			}
-		}
-	}
+            if(grid[i][j])
+            {
+                RIT128x96x4ImageDraw(bmpBlock, x, y, width, height);
+            }
+            else
+            {
+                RIT128x96x4ImageDraw(bmpClear, x, y, width, height);
+            }
+        }
+    }
+
+    int x = xOffset + (width * locationX);
+    int y = yOffset + (height * locationY);
+
+    // Draw current shape
+    if(shape == S_O)
+    {
+        // Orientation doesn't matter
+        RIT128x96x4ImageDraw(bmpBlock, x, y, width, height);
+        RIT128x96x4ImageDraw(bmpBlock, x + width, y, width, height);
+        RIT128x96x4ImageDraw(bmpBlock, x, y + width, width, height);
+        RIT128x96x4ImageDraw(bmpBlock, x + width, y + width, width, height);
+    }
+    else if(shape == S_I)
+    {
+        if(orientation == O_000 || orientation == O_180)
+        {
+            RIT128x96x4ImageDraw(bmpBlock, x, y, width, height);
+            RIT128x96x4ImageDraw(bmpBlock, x, y + width, width, height);
+            RIT128x96x4ImageDraw(bmpBlock, x, y + (width * 2), width, height);
+            RIT128x96x4ImageDraw(bmpBlock, x, y + (width * 3), width, height);
+        }
+        else
+        {
+            RIT128x96x4ImageDraw(bmpBlock, x, y, width, height);
+            RIT128x96x4ImageDraw(bmpBlock, x + width, y, width, height);
+            RIT128x96x4ImageDraw(bmpBlock, x + (width * 2), y, width, height);
+            RIT128x96x4ImageDraw(bmpBlock, x + (width * 3), y, width, height);
+        }
+    }
+    else if(shape == S_S)
+    {
+        if(orientation == O_000 || orientation == O_180)
+        {
+            RIT128x96x4ImageDraw(bmpBlock, x, y + width, width, height);
+            RIT128x96x4ImageDraw(bmpBlock, x + width, y + width, width, height);
+            RIT128x96x4ImageDraw(bmpBlock, x + width, y, width, height);
+            RIT128x96x4ImageDraw(bmpBlock, x + (width * 2), y, width, height);
+        }
+        else
+        {
+            RIT128x96x4ImageDraw(bmpBlock, x, y, width, height);
+            RIT128x96x4ImageDraw(bmpBlock, x, y + width, width, height);
+            RIT128x96x4ImageDraw(bmpBlock, x + width, y + width, width, height);
+            RIT128x96x4ImageDraw(bmpBlock, x + width, y + (width * 2), width, height);
+        }
+    }
+    else if(shape == S_Z)
+    {
+        if(orientation == O_000 || orientation == O_180)
+        {
+            RIT128x96x4ImageDraw(bmpBlock, x, y, width, height);
+            RIT128x96x4ImageDraw(bmpBlock, x + width, y, width, height);
+            RIT128x96x4ImageDraw(bmpBlock, x + width, y + width, width, height);
+            RIT128x96x4ImageDraw(bmpBlock, x + (width * 2), y + width, width, height);
+        }
+        else
+        {
+            RIT128x96x4ImageDraw(bmpBlock, x + width, y, width, height);
+            RIT128x96x4ImageDraw(bmpBlock, x + width, y + width, width, height);
+            RIT128x96x4ImageDraw(bmpBlock, x, y + width, width, height);
+            RIT128x96x4ImageDraw(bmpBlock, x, y + (width * 2), width, height);
+        }
+    }
+    else if(shape == S_L)
+    {
+        if(orientation == O_000)
+        {
+            RIT128x96x4ImageDraw(bmpBlock, x, y, width, height);
+            RIT128x96x4ImageDraw(bmpBlock, x, y + width, width, height);
+            RIT128x96x4ImageDraw(bmpBlock, x, y + (width * 2), width, height);
+            RIT128x96x4ImageDraw(bmpBlock, x + width, y + (width * 2), width, height);
+        }
+        else if(orientation == O_090)
+        {
+            RIT128x96x4ImageDraw(bmpBlock, x, y, width, height);
+            RIT128x96x4ImageDraw(bmpBlock, x + width, y, width, height);
+            RIT128x96x4ImageDraw(bmpBlock, x + (width * 2), y, width, height);
+            RIT128x96x4ImageDraw(bmpBlock, x, y + width, width, height);
+        }
+        else if(orientation == O_180)
+        {
+            RIT128x96x4ImageDraw(bmpBlock, x, y, width, height);
+            RIT128x96x4ImageDraw(bmpBlock, x + width, y, width, height);
+            RIT128x96x4ImageDraw(bmpBlock, x + width, y + width, width, height);
+            RIT128x96x4ImageDraw(bmpBlock, x + width, y + (width * 2), width, height);
+        }
+        else
+        {
+            RIT128x96x4ImageDraw(bmpBlock, x, y + width, width, height);
+            RIT128x96x4ImageDraw(bmpBlock, x + width, y + width, width, height);
+            RIT128x96x4ImageDraw(bmpBlock, x + (width * 2), y + width, width, height);
+            RIT128x96x4ImageDraw(bmpBlock, x + (width * 2), y, width, height);
+        }
+    }
+    else if(shape == S_J)
+    {
+        if(orientation == O_000)
+        {
+            RIT128x96x4ImageDraw(bmpBlock, x + width, y, width, height);
+            RIT128x96x4ImageDraw(bmpBlock, x + width, y + width, width, height);
+            RIT128x96x4ImageDraw(bmpBlock, x + width, y + (width * 2), width, height);
+            RIT128x96x4ImageDraw(bmpBlock, x, y + (width * 2), width, height);
+        }
+        else if (orientation == O_090)
+        {
+            RIT128x96x4ImageDraw(bmpBlock, x, y, width, height);
+            RIT128x96x4ImageDraw(bmpBlock, x, y + width, width, height);
+            RIT128x96x4ImageDraw(bmpBlock, x + width, y + width, width, height);
+            RIT128x96x4ImageDraw(bmpBlock, x + (width * 2), y + width, width, height);
+        }
+        else if (orientation == O_180)
+        {
+            RIT128x96x4ImageDraw(bmpBlock, x, y, width, height);
+            RIT128x96x4ImageDraw(bmpBlock, x + width, y, width, height);
+            RIT128x96x4ImageDraw(bmpBlock, x, y + width, width, height);
+            RIT128x96x4ImageDraw(bmpBlock, x, y + (width * 2), width, height);
+        }
+        else
+        {
+            RIT128x96x4ImageDraw(bmpBlock, x, y, width, height);
+            RIT128x96x4ImageDraw(bmpBlock, x + width, y, width, height);
+            RIT128x96x4ImageDraw(bmpBlock, x + (width * 2), y, width, height);
+            RIT128x96x4ImageDraw(bmpBlock, x + (width * 2), y + width, width, height);
+        }
+    }
+    else if(shape == S_T)
+    {
+        if(orientation == O_000)
+        {
+            RIT128x96x4ImageDraw(bmpBlock, x, y, width, height);
+            RIT128x96x4ImageDraw(bmpBlock, x + width, y, width, height);
+            RIT128x96x4ImageDraw(bmpBlock, x + (width * 2), y, width, height);
+            RIT128x96x4ImageDraw(bmpBlock, x + width, y + width, width, height);
+        }
+        else if (orientation == O_090)
+        {
+            RIT128x96x4ImageDraw(bmpBlock, x + width, y, width, height);
+            RIT128x96x4ImageDraw(bmpBlock, x + width, y + width, width, height);
+            RIT128x96x4ImageDraw(bmpBlock, x + width, y + (width * 2), width, height);
+            RIT128x96x4ImageDraw(bmpBlock, x, y + width, width, height);
+        }
+        else if (orientation == O_180)
+        {
+            RIT128x96x4ImageDraw(bmpBlock, x, y + width, width, height);
+            RIT128x96x4ImageDraw(bmpBlock, x + width, y + width, width, height);
+            RIT128x96x4ImageDraw(bmpBlock, x + (width * 2), y + width, width, height);
+            RIT128x96x4ImageDraw(bmpBlock, x + width, y, width, height);
+        }
+        else
+        {
+            RIT128x96x4ImageDraw(bmpBlock, x, y, width, height);
+            RIT128x96x4ImageDraw(bmpBlock, x, y + width, width, height);
+            RIT128x96x4ImageDraw(bmpBlock, x, y + (width * 2), width, height);
+            RIT128x96x4ImageDraw(bmpBlock, x + width, y + width, width, height);
+        }
+    }
 }
 
 int main(void)
