@@ -52,6 +52,7 @@ int orientation = -1;
 int locationX = -1;
 int locationY = -1;
 int grid[200] = { 0 };
+int score = 0;
 
 // Button states
 int b0 = 0; // D
@@ -68,7 +69,7 @@ const int yOffset = 16;
 const int maxX = 9;
 const int maxY = 19;
 
-char * intToString(int input)
+inline char * intToString(int input)
 {
     // Convert int to char pointer
     // Only works with non-negative values 0 - 99
@@ -139,7 +140,7 @@ inline int ValidButtonCombo(int b0_t, int b1_t, int b2_t, int b3_t, int b4_t)
     return b1_t + b2_t + b3_t + b4_t <= 1;
 }
 
-void Transpose(int *a, int *b, int *c, int *d)
+inline void Transpose(int *a, int *b, int *c, int *d)
 {
    int temp = *a;
    *a = *b;
@@ -148,7 +149,7 @@ void Transpose(int *a, int *b, int *c, int *d)
    *d = temp;
 }
 
-void Rotate(int *m, int n)
+inline void Rotate(int *m, int n)
 {
     int i, j;
     for(i = 0; i < n / 2; i++)
@@ -160,7 +161,7 @@ void Rotate(int *m, int n)
     }
 }
 
-void RotateShape(int *m, int n, int newOrientation)
+inline void RotateShape(int *m, int n, int newOrientation)
 {
     int rotations =
         shape == S_O ? 0 :
@@ -177,14 +178,14 @@ void RotateShape(int *m, int n, int newOrientation)
     }
 }
 
-int * Copy(const int *src, int len)
+inline int * Copy(const int *src, int len)
 {
     int *copy = malloc(len * sizeof(int));
     memcpy(copy, src, len * sizeof(int));
     return copy;
 }
 
-int CheckPosition(int *shape, int shapeSize, int newX, int newY)
+inline int CheckPosition(int *shape, int shapeSize, int newX, int newY)
 {
     int i, j;
     for(i = 0; i < shapeSize; i++)
@@ -205,7 +206,7 @@ int CheckPosition(int *shape, int shapeSize, int newX, int newY)
                     return 0;
                 }
 
-                if(grid[(newX * (maxX + 1)) + (i * (maxX + 1)) + newY + j])
+                if(grid[((newY + i) * (maxX + 1)) + newX + j])
                 {
                     return 0;
                 }
@@ -216,7 +217,7 @@ int CheckPosition(int *shape, int shapeSize, int newX, int newY)
     return 1;
 }
 
-int GetNextOrientation()
+inline int GetNextOrientation()
 {
     if(orientation == O_000)
     {
@@ -234,7 +235,7 @@ int GetNextOrientation()
     return  O_000;
 }
 
-int TryChangeOrientation()
+inline int TryChangeOrientation()
 {
     int next = GetNextOrientation();
 
@@ -252,7 +253,7 @@ int TryChangeOrientation()
     return 0;
 }
 
-int TryMove(int newX, int newY)
+inline int TryMove(int newX, int newY)
 {
     if(CheckPosition(&shapeDef[0], shapeDefSize, newX, newY))
     {
@@ -261,6 +262,72 @@ int TryMove(int newX, int newY)
         return 1;
     }
     return 0;
+}
+
+inline void StoreShape()
+{
+	int i, j;
+    for(i = 0; i < shapeDefSize; i++)
+    {
+        for(j = 0; j < shapeDefSize; j++)
+        {
+            if(shapeDef[i * shapeDefSize + j])
+            {
+            	grid[((locationY + i) * (maxX + 1)) + locationX + j] = 1;
+            }
+        }
+    }
+}
+
+inline void RemoveLine(int lineIndex)
+{
+	int i, j;
+	for(i = lineIndex; i > 0; i--)
+	{
+		for(j = 0; j <= maxX; j++)
+		{
+			grid[i * (maxX + 1) + j] = grid[(i - 1) * (maxX + 1) + j];
+		}
+	}
+
+	// Clear top line
+	for(j = 0; j < maxX; j++)
+	{
+		grid[j] = 0;
+	}
+}
+
+inline int ClearLines()
+{
+	int linesRemoved = 0;
+
+	int i, j;
+    for(i = maxY; i >= 0; i--)
+    {
+    	int removeLine = 1;
+        for(j = 0; j <= maxX; j++)
+        {
+        	if(!grid[i * (maxX + 1) + j])
+        	{
+        		removeLine = 0;
+        		break;
+        	}
+        }
+
+        if(removeLine)
+        {
+        	RemoveLine(i);
+        	i++; // Reevaluate this line since it just changed
+        	linesRemoved++;
+        }
+    }
+
+    return linesRemoved;
+}
+
+inline void UpdateScore(int numLines)
+{
+
 }
 
 void Timer0IntHandler(void)
@@ -335,11 +402,9 @@ void Timer0IntHandler(void)
     	if(!TryMove(locationX, locationY + 1))
     	{
     		// Hit bottom or another piece
-
-    		// TODO
-    		// Store piece
-    		// Clear lines (function should return number removed for score)
-    		// Increment score
+    		StoreShape();
+    		int numLines = ClearLines();
+    		UpdateScore(numLines);
 
     		free(shapeDef);
     		shapeDef = NULL;
@@ -357,7 +422,7 @@ void Timer0IntHandler(void)
     }
 }
 
-void DrawShape(int *m, int rows, int cols, int x, int y, unsigned char *bufferT, unsigned char *bufferF)
+inline void DrawShape(int *m, int rows, int cols, int x, int y, unsigned char *bufferT, unsigned char *bufferF)
 {
     int startX = xOffset + (width * x);
     int startY = yOffset + (height * y);
@@ -382,7 +447,7 @@ void DrawShape(int *m, int rows, int cols, int x, int y, unsigned char *bufferT,
     }
 }
 
-void DrawGame()
+inline void DrawGame()
 {
     unsigned char *bmpBlock = (unsigned char *)&block[0];
     unsigned char *bmpClear = (unsigned char *)&clear[0];
