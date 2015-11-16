@@ -42,6 +42,7 @@ const int timerDivisor = 100;
 // Control flags
 int tick = 0;
 int first = 1;
+int dropCounter = 0;
 
 // Game state
 int shape = -1;
@@ -266,6 +267,17 @@ void Timer0IntHandler(void)
 {
     TimerIntClear(TIMER0_BASE, TIMER_TIMA_TIMEOUT);
 
+    if(!shapeDef)
+    {
+        // TODO remove test code, generate random new piece, test of piece hit existing pieces
+        shape = S_I;
+        shapeDefSize = 4;
+        shapeDef = Copy(&SD_I[0], shapeDefSize * shapeDefSize);
+        locationX = 7;
+        locationY = 10;
+        orientation = O_000;
+    }
+
     //AudioHandler(); // Play sounds
 
     // Get button states
@@ -317,17 +329,29 @@ void Timer0IntHandler(void)
     b3 = b3_t;
     b4 = b4_t;
 
+    dropCounter++;
+    if(dropCounter == timerDivisor)
+    {
+    	if(!TryMove(locationX, locationY + 1))
+    	{
+    		// Hit bottom or another piece
+
+    		// TODO
+    		// Store piece
+    		// Clear lines (function should return number removed for score)
+    		// Increment score
+
+    		free(shapeDef);
+    		shapeDef = NULL;
+    	}
+
+    	dropCounter = 0;
+    	tick = 1;
+    }
+
     // Trigger the event the first time so the initial screen is drawn
     if(first)
     {
-        // TODO remove test code
-        shape = S_I;
-        shapeDefSize = 4;
-        shapeDef = Copy(&SD_I[0], shapeDefSize * shapeDefSize);
-        locationX = 7;
-        locationY = 10;
-        orientation = O_000;
-
         first = 0;
         tick = 1; // Signal event
     }
@@ -365,7 +389,7 @@ void DrawGame()
 
     DrawShape(grid, 20, 10, 0, 0, bmpBlock, bmpClear);
 
-    if(shapeDefSize)
+    if(shapeDef)
     {
         DrawShape(shapeDef, shapeDefSize, shapeDefSize, locationX, locationY, bmpBlock, NULL);
     }
