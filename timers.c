@@ -54,6 +54,7 @@ int locationY = -1;
 int grid[200] = { 0 };
 int score = 0;
 int tetris = 0;
+int gameover = 0;
 
 // Button states
 int b0 = 0; // D
@@ -315,19 +316,79 @@ inline void UpdateScore(int numLines)
 	score += numLines * 100;
 }
 
+int r = 0; // TODO
+int GetRandom(int min, int max)
+{
+	r++;
+	if(r == max)
+	{
+		r = 0;
+	}
+	return r;
+}
+
+void GetNextShape()
+{
+    shape = GetRandom(0, 7);
+
+    if(shape == S_O)
+    {
+    	shapeDefSize = 2;
+    	shapeDef = Copy(&SD_O[0], shapeDefSize * shapeDefSize);
+    }
+    else if(shape == S_I)
+    {
+    	shapeDefSize = 4;
+    	shapeDef = Copy(&SD_I[0], shapeDefSize * shapeDefSize);
+    }
+    else
+    {
+    	shapeDefSize = 3;
+    	if(shape == S_S)
+		{
+    		shapeDef = Copy(&SD_S[0], shapeDefSize * shapeDefSize);
+		}
+    	else if(shape == S_Z)
+    	{
+    		shapeDef = Copy(&SD_Z[0], shapeDefSize * shapeDefSize);
+    	}
+    	else if(shape == S_L)
+    	{
+    		shapeDef = Copy(&SD_L[0], shapeDefSize * shapeDefSize);
+    	}
+    	else if (shape == S_J)
+    	{
+    		shapeDef = Copy(&SD_J[0], shapeDefSize * shapeDefSize);
+    	}
+    	else
+    	{
+    		shapeDef = Copy(&SD_T[0], shapeDefSize * shapeDefSize);
+    	}
+    }
+
+    locationX = 4;
+    locationY = 0;
+    orientation = O_000;
+
+    if(!TryMove(locationX, locationY))
+    {
+    	gameover = 1;
+    }
+}
+
 void Timer0IntHandler(void)
 {
     TimerIntClear(TIMER0_BASE, TIMER_TIMA_TIMEOUT);
 
+    if(gameover)
+    {
+    	return;
+    }
+
     if(!shapeDef)
     {
-        // TODO remove test code, generate random new piece, test of piece hit existing pieces
-        shape = S_I;
-        shapeDefSize = 4;
-        shapeDef = Copy(&SD_I[0], shapeDefSize * shapeDefSize);
-        locationX = 7;
-        locationY = 10;
-        orientation = O_000;
+    	GetNextShape();
+    	tick = 1;
     }
 
     //AudioHandler(); // Play sounds
@@ -410,10 +471,10 @@ void Timer0IntHandler(void)
 inline char * IntToString(int input)
 {
     // Convert int to char pointer
-    // Only works with non-negative values 0 - 99999
+    // Only works with non-negative values 0 - 999999
     int flag = 0;
-    int i = 4;
-    char str[6] = { '0', '0', '0', '0', '0', '\0' };
+    int i = 5;
+    char str[7] = { '0', '0', '0', '0', '0', '0', '\0' };
     while(input != 0)
     {
         str[i--] = (input % 10) + '0';
@@ -423,10 +484,10 @@ inline char * IntToString(int input)
 
     if(!flag) // Input == 0
     {
-        return "00000";
+        return "000000";
     }
 
-    char *result = malloc(6);
+    char *result = malloc(7);
     if(result == NULL)
     {
         return NULL;
@@ -434,7 +495,7 @@ inline char * IntToString(int input)
 
     { // Additional scope so we don't need to define j up top, CC Studio is C89
         int j;
-        for(j = 0; j < 6; j++)
+        for(j = 0; j < 7; j++)
         {
             result[j] = str[j];
         }
@@ -484,6 +545,11 @@ inline void DrawGame()
     RIT128x96x4StringDraw("Score:", 0, 70, 15);
     RIT128x96x4StringDraw(scoreSt, 0, 80, 15);
     free(scoreSt);
+
+    if(gameover)
+    {
+    	RIT128x96x4StringDraw("   GAME OVER   ", 20, 48, 15);
+    }
 }
 
 int main(void)
