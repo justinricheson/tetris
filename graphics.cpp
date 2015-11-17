@@ -40,3 +40,4 @@ const int SD_Z[9] = { 1, 1, 0, 0, 1, 1, 0, 0, 0 };
 const int SD_L[9] = { 1, 0, 0, 1, 0, 0, 1, 1, 0 };
 const int SD_J[9] = { 0, 1, 0, 0, 1, 0, 1, 1, 0 };
 const int SD_T[9] = { 1, 1, 1, 0, 1, 0, 0, 0, 0 };
+const int SD_C[16] = { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 }; // Used to clear a shape

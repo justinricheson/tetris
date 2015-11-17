@@ -46,8 +46,11 @@ int dropCounter = 0;
 
 // Game state
 int shape = -1;
+int nextShape = -1;
 int *shapeDef = NULL;
+int *nextShapeDef = NULL;
 int shapeDefSize = 0;
+int nextShapeDefSize = 0;
 int orientation = -1;
 int locationX = -1;
 int locationY = -1;
@@ -316,55 +319,64 @@ inline void UpdateScore(int numLines)
 	score += numLines * 100;
 }
 
-int r = 0; // TODO
-int GetRandom(int min, int max)
+void InitShape(int s, int **buffer, int *size)
 {
-	r++;
-	if(r == max)
+	if(*buffer)
 	{
-		r = 0;
+		free(*buffer);
 	}
-	return r;
+
+	if(s == S_O)
+	{
+		*size = 2;
+		*buffer = Copy(&SD_O[0], *size * *size);
+	}
+	else if(s == S_I)
+	{
+		*size = 4;
+		*buffer = Copy(&SD_I[0], *size * *size);
+	}
+	else
+	{
+		*size = 3;
+		if(s == S_S)
+		{
+			*buffer = Copy(&SD_S[0], *size * *size);
+		}
+		else if(s == S_Z)
+		{
+			*buffer = Copy(&SD_Z[0], *size * *size);
+		}
+		else if(s == S_L)
+		{
+			*buffer = Copy(&SD_L[0], *size * *size);
+		}
+		else if (s == S_J)
+		{
+			*buffer = Copy(&SD_J[0], *size * *size);
+		}
+		else
+		{
+			*buffer = Copy(&SD_T[0], *size * *size);
+		}
+	}
 }
 
 void GetNextShape()
 {
-    shape = GetRandom(0, 7);
+	int r = rand(); // Not sure how to get a true random seed
+	srand(r); // This seems to give a more even spread
 
-    if(shape == S_O)
-    {
-    	shapeDefSize = 2;
-    	shapeDef = Copy(&SD_O[0], shapeDefSize * shapeDefSize);
-    }
-    else if(shape == S_I)
-    {
-    	shapeDefSize = 4;
-    	shapeDef = Copy(&SD_I[0], shapeDefSize * shapeDefSize);
-    }
-    else
-    {
-    	shapeDefSize = 3;
-    	if(shape == S_S)
-		{
-    		shapeDef = Copy(&SD_S[0], shapeDefSize * shapeDefSize);
-		}
-    	else if(shape == S_Z)
-    	{
-    		shapeDef = Copy(&SD_Z[0], shapeDefSize * shapeDefSize);
-    	}
-    	else if(shape == S_L)
-    	{
-    		shapeDef = Copy(&SD_L[0], shapeDefSize * shapeDefSize);
-    	}
-    	else if (shape == S_J)
-    	{
-    		shapeDef = Copy(&SD_J[0], shapeDefSize * shapeDefSize);
-    	}
-    	else
-    	{
-    		shapeDef = Copy(&SD_T[0], shapeDefSize * shapeDefSize);
-    	}
-    }
+	if(!nextShapeDef)
+	{
+		nextShape = (r % 7) - 1;
+	}
+
+	shape = nextShape;
+	nextShape = (r % 7) - 1;
+
+    InitShape(shape, &shapeDef, &shapeDefSize);
+    InitShape(nextShape, &nextShapeDef, &nextShapeDefSize);
 
     locationX = 4;
     locationY = 0;
@@ -539,6 +551,11 @@ inline void DrawGame()
     if(shapeDef)
     {
         DrawShape(shapeDef, shapeDefSize, shapeDefSize, locationX, locationY, bmpBlock, NULL);
+    }
+    if(nextShapeDef)
+    {
+    	DrawShape((int*)&SD_C[0], 4, 4, 13, -2, bmpBlock, bmpClear); // Clear previous
+    	DrawShape(nextShapeDef, nextShapeDefSize, nextShapeDefSize, 13, -2, bmpBlock, NULL);
     }
 
     char *scoreSt = IntToString(score);

@@ -12,5 +12,6 @@ extern const int SD_Z[9];
 extern const int SD_L[9];
 extern const int SD_J[9];
 extern const int SD_T[9];
+extern const int SD_C[16];
 
 #endif
