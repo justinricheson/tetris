@@ -412,21 +412,21 @@ void Timer0IntHandler(void)
                 tick = 1;
             }
         }
-        if(ButtonDown(b2_t, b2))
+        if(ButtonDown(b2_t, b2) || b2_t && dropCounter % 10 == 0) // Throttle to 1/10th seconds
         {
         	if(TryMove(locationX - 1, locationY))
         	{
         		tick = 1;
         	}
         }
-        if(ButtonDown(b3_t, b3))
+        if(ButtonDown(b3_t, b3) || b3_t && dropCounter % 10 == 0)
         {
         	if(TryMove(locationX + 1, locationY))
         	{
         		tick = 1;
         	}
         }
-        if(ButtonDown(b1_t, b1))
+        if(b1_t) // Continuous press
         {
         	if(TryMove(locationX, locationY + 1))
         	{
