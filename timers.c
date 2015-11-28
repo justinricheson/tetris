@@ -226,8 +226,8 @@ inline int TryMove(int newX, int newY)
 {
     if(CheckPosition(&shapeDef[0], shapeDefSize, newX, newY))
     {
-    	locationX = newX;
-    	locationY = newY;
+        locationX = newX;
+        locationY = newY;
         return 1;
     }
     return 0;
@@ -235,14 +235,14 @@ inline int TryMove(int newX, int newY)
 
 inline void StoreShape()
 {
-	int i, j;
+    int i, j;
     for(i = 0; i < shapeDefSize; i++)
     {
         for(j = 0; j < shapeDefSize; j++)
         {
             if(shapeDef[i * shapeDefSize + j])
             {
-            	grid[((locationY + i) * (maxX + 1)) + locationX + j] = 1;
+                grid[((locationY + i) * (maxX + 1)) + locationX + j] = 1;
             }
         }
     }
@@ -250,44 +250,44 @@ inline void StoreShape()
 
 inline void RemoveLine(int lineIndex)
 {
-	int i, j;
-	for(i = lineIndex; i > 0; i--)
-	{
-		for(j = 0; j <= maxX; j++)
-		{
-			grid[i * (maxX + 1) + j] = grid[(i - 1) * (maxX + 1) + j];
-		}
-	}
+    int i, j;
+    for(i = lineIndex; i > 0; i--)
+    {
+        for(j = 0; j <= maxX; j++)
+        {
+            grid[i * (maxX + 1) + j] = grid[(i - 1) * (maxX + 1) + j];
+        }
+    }
 
-	// Clear top line
-	for(j = 0; j < maxX; j++)
-	{
-		grid[j] = 0;
-	}
+    // Clear top line
+    for(j = 0; j < maxX; j++)
+    {
+        grid[j] = 0;
+    }
 }
 
 inline int ClearLines()
 {
-	int linesRemoved = 0;
+    int linesRemoved = 0;
 
-	int i, j;
+    int i, j;
     for(i = maxY; i >= 0; i--)
     {
-    	int removeLine = 1;
+        int removeLine = 1;
         for(j = 0; j <= maxX; j++)
         {
-        	if(!grid[i * (maxX + 1) + j])
-        	{
-        		removeLine = 0;
-        		break;
-        	}
+            if(!grid[i * (maxX + 1) + j])
+            {
+                removeLine = 0;
+                break;
+            }
         }
 
         if(removeLine)
         {
-        	RemoveLine(i);
-        	i++; // Reevaluate this line since it just changed
-        	linesRemoved++;
+            RemoveLine(i);
+            i++; // Reevaluate this line since it just changed
+            linesRemoved++;
         }
     }
 
@@ -296,83 +296,83 @@ inline int ClearLines()
 
 inline void UpdateScore(int numLines)
 {
-	if(numLines == 0)
-	{
-		score += 10;
-		return;
-	}
-	if(numLines == 4)
-	{
-		if(tetris)
-		{
-			score += 1200;
-		}
-		else
-		{
-			tetris = 1;
-			score += 800;
-		}
-		return;
-	}
+    if(numLines == 0)
+    {
+        score += 10;
+        return;
+    }
+    if(numLines == 4)
+    {
+        if(tetris)
+        {
+            score += 1200;
+        }
+        else
+        {
+            tetris = 1;
+            score += 800;
+        }
+        return;
+    }
 
-	tetris = 0;
-	score += numLines * 100;
+    tetris = 0;
+    score += numLines * 100;
 }
 
 void InitShape(int s, int **buffer, int *size)
 {
-	if(*buffer)
-	{
-		free(*buffer);
-	}
+    if(*buffer)
+    {
+        free(*buffer);
+    }
 
-	if(s == S_O)
-	{
-		*size = 2;
-		*buffer = Copy(&SD_O[0], *size * *size);
-	}
-	else if(s == S_I)
-	{
-		*size = 4;
-		*buffer = Copy(&SD_I[0], *size * *size);
-	}
-	else
-	{
-		*size = 3;
-		if(s == S_S)
-		{
-			*buffer = Copy(&SD_S[0], *size * *size);
-		}
-		else if(s == S_Z)
-		{
-			*buffer = Copy(&SD_Z[0], *size * *size);
-		}
-		else if(s == S_L)
-		{
-			*buffer = Copy(&SD_L[0], *size * *size);
-		}
-		else if (s == S_J)
-		{
-			*buffer = Copy(&SD_J[0], *size * *size);
-		}
-		else
-		{
-			*buffer = Copy(&SD_T[0], *size * *size);
-		}
-	}
+    if(s == S_O)
+    {
+        *size = 2;
+        *buffer = Copy(&SD_O[0], *size * *size);
+    }
+    else if(s == S_I)
+    {
+        *size = 4;
+        *buffer = Copy(&SD_I[0], *size * *size);
+    }
+    else
+    {
+        *size = 3;
+        if(s == S_S)
+        {
+            *buffer = Copy(&SD_S[0], *size * *size);
+        }
+        else if(s == S_Z)
+        {
+            *buffer = Copy(&SD_Z[0], *size * *size);
+        }
+        else if(s == S_L)
+        {
+            *buffer = Copy(&SD_L[0], *size * *size);
+        }
+        else if (s == S_J)
+        {
+            *buffer = Copy(&SD_J[0], *size * *size);
+        }
+        else
+        {
+            *buffer = Copy(&SD_T[0], *size * *size);
+        }
+    }
 }
 
 void GetNextShape()
 {
-	int r = rand();
+    int r = rand();
 
-	if(!nextShapeDef)
-	{
-		nextShape = (r % 7) - 1;
-	}
+    if(!nextShapeDef)
+    {
+        nextShape = (r % 7) - 1;
+    }
 
-	shape = nextShape;
-	nextShape = (r % 7) - 1;
+    shape = nextShape;
+    nextShape = (r % 7) - 1;
 
     InitShape(shape, &shapeDef, &shapeDefSize);
     InitShape(nextShape, &nextShapeDef, &nextShapeDefSize);
@@ -383,7 +383,7 @@ void GetNextShape()
 
     if(!TryMove(locationX, locationY))
     {
-    	gameover = 1;
+        gameover = 1;
     }
 }
 
@@ -393,13 +393,13 @@ void Timer0IntHandler(void)
 
     if(gameover)
     {
-    	return;
+        return;
     }
 
     if(!shapeDef)
     {
-    	GetNextShape();
-    	tick = 1;
+        GetNextShape();
+        tick = 1;
     }
 
     //AudioHandler(); // Play sounds
@@ -426,26 +426,26 @@ void Timer0IntHandler(void)
         }
         if(ButtonDown(b2_t, b2) || b2_t && dropCounter % 10 == 0) // Throttle to 1/10th seconds
         {
-        	if(TryMove(locationX - 1, locationY))
-        	{
-        		tick = 1;
-        		srand(dropCounter);
-        	}
+            if(TryMove(locationX - 1, locationY))
+            {
+                tick = 1;
+                srand(dropCounter);
+            }
         }
         if(ButtonDown(b3_t, b3) || b3_t && dropCounter % 10 == 0)
         {
-        	if(TryMove(locationX + 1, locationY))
-        	{
-        		tick = 1;
-        		srand(dropCounter);
-        	}
+            if(TryMove(locationX + 1, locationY))
+            {
+                tick = 1;
+                srand(dropCounter);
+            }
         }
         if(b1_t) // Continuous press
         {
-        	if(TryMove(locationX, locationY + 1))
-        	{
-        		tick = 1;
-        	}
+            if(TryMove(locationX, locationY + 1))
+            {
+                tick = 1;
+            }
         }
     }
 
@@ -459,19 +459,19 @@ void Timer0IntHandler(void)
     dropCounter++;
     if(dropCounter == timerDivisor)
     {
-    	if(!TryMove(locationX, locationY + 1))
-    	{
-    		// Hit bottom or another piece
-    		StoreShape();
-    		int numLines = ClearLines();
-    		UpdateScore(numLines);
+        if(!TryMove(locationX, locationY + 1))
+        {
+            // Hit bottom or another piece
+            StoreShape();
+            int numLines = ClearLines();
+            UpdateScore(numLines);
 
-    		free(shapeDef);
-    		shapeDef = NULL;
-    	}
+            free(shapeDef);
+            shapeDef = NULL;
+        }
 
-    	dropCounter = 0;
-    	tick = 1;
+        dropCounter = 0;
+        tick = 1;
     }
 
     // Trigger the event the first time so the initial screen is drawn
@@ -556,8 +556,8 @@ inline void DrawGame()
     }
     if(nextShapeDef)
     {
-    	DrawShape((int*)&SD_C[0], 4, 4, 13, -2, bmpBlock, bmpClear); // Clear previous
-    	DrawShape(nextShapeDef, nextShapeDefSize, nextShapeDefSize, 13, -2, bmpBlock, NULL);
+        DrawShape((int*)&SD_C[0], 4, 4, 13, -2, bmpBlock, bmpClear); // Clear previous
+        DrawShape(nextShapeDef, nextShapeDefSize, nextShapeDefSize, 13, -2, bmpBlock, NULL);
     }
 
     char *scoreSt = IntToString(score);
@@ -567,7 +567,7 @@ inline void DrawGame()
 
     if(gameover)
     {
-    	RIT128x96x4StringDraw("   GAME OVER   ", 20, 48, 15);
+        RIT128x96x4StringDraw("   GAME OVER   ", 20, 48, 15);
     }
 }
 
