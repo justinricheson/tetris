@@ -364,8 +364,7 @@ void InitShape(int s, int **buffer, int *size)
 
 void GetNextShape()
 {
-	int r = rand(); // Not sure how to get a true random seed
-	srand(r); // This seems to give a more even spread
+	int r = rand();
 
 	if(!nextShapeDef)
 	{
@@ -422,6 +421,7 @@ void Timer0IntHandler(void)
             if(TryChangeOrientation())
             {
                 tick = 1;
+                srand(dropCounter);
             }
         }
         if(ButtonDown(b2_t, b2) || b2_t && dropCounter % 10 == 0) // Throttle to 1/10th seconds
@@ -429,6 +429,7 @@ void Timer0IntHandler(void)
         	if(TryMove(locationX - 1, locationY))
         	{
         		tick = 1;
+        		srand(dropCounter);
         	}
         }
         if(ButtonDown(b3_t, b3) || b3_t && dropCounter % 10 == 0)
@@ -436,6 +437,7 @@ void Timer0IntHandler(void)
         	if(TryMove(locationX + 1, locationY))
         	{
         		tick = 1;
+        		srand(dropCounter);
         	}
         }
         if(b1_t) // Continuous press
